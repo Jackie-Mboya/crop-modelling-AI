@@ -39,7 +39,7 @@ crop-modelling-AI/
     └── evaluation_plots.png       Step 5 diagnostic figure
 ```
 
-## 3. Crop model layer — `src/apsim_driver.py`
+## 3. Crop model layer: `src/apsim_driver.py`
 
 `NativeAPSIMDriver` is written to call a real, locally installed APSIM Next Generation binary (`Models.exe`) against a base `.apsimx` maize simulation file, with the binary path and file location read from `config/crop_model_config.json`. Where the APSIM executable and simulation file are not present, with no APSIM installation available, the driver falls back to a physiologically parameterised proxy of APSIM's own maize yield response, rather than an arbitrary placeholder function:
 
@@ -52,7 +52,7 @@ This is a disclosed simplification, not a substitute for a calibrated APSIM run:
 
 **Location and crop.** Western Kenya, Zone 1 (`config/crop_model_config.json`), maize, sown 15 March in the baseline scenarios.
 
-## 4. Step 2 — Fertilizer scenario comparison
+## 4. Step 2: Fertilizer scenario comparison
 
 Three nitrogen scenarios at fixed sowing date (15 March) and rainfall (550 mm):
 
@@ -62,22 +62,22 @@ Three nitrogen scenarios at fixed sowing date (15 March) and rainfall (550 mm):
 | Moderate N | 60 | 6,245.3 | 6.25 |
 | High N | 120 | 7,136.2 | 7.14 |
 
-The response shows the expected diminishing-returns pattern of a saturating N-uptake function: the yield gain from 0→60 kg N/ha (+2,623 kg/ha) is more than double the gain from 60→120 kg N/ha (+891 kg/ha). Output: `outputs/scenario_comparison.csv`.
+The response shows the expected diminishing-returns pattern of a saturating N-uptake function: the yield gain from 0 to 60 kg N/ha (+2,623 kg/ha) is more than double the gain from 60 to 120 kg N/ha (+891 kg/ha). Output: `outputs/scenario_comparison.csv`.
 
-## 5. Step 3 — Simulation dataset
+## 5. Step 3: Simulation dataset
 
-`generate_simulation_dataset()` produces n=100 records varying three primary agronomic factors — **rainfall** (280–850 mm), **nitrogen rate** (0–160 kg/ha), and **sowing date** (four dates spanning 10 March–20 April) — with **soil organic carbon** (0.8–2.2%) as a fourth covariate. For each record the driver also constructs a synthetic **field-observed yield**, offset from the simulated yield by a stochastic management-efficiency factor (0.75–0.92), a rainfall-conditional pest/disease loss term (higher under high-rainfall, high-pest-pressure conditions), and Gaussian noise. This observed/simulated pairing is what makes the Option B bias-correction model trainable: without a disclosed, structured gap between the two, there is nothing for a bias corrector to learn. Output: `data/simulation_dataset.csv`.
+`generate_simulation_dataset()` produces n=100 records varying three primary agronomic factors, **rainfall** (280–850 mm), **nitrogen rate** (0–160 kg/ha), and **sowing date** (four dates spanning 10 March–20 April), with **soil organic carbon** (0.8–2.2%) as a fourth covariate. For each record the driver also constructs a synthetic **field-observed yield**, offset from the simulated yield by a stochastic management-efficiency factor (0.75–0.92), a rainfall-conditional pest/disease loss term (higher under high-rainfall, high-pest-pressure conditions), and Gaussian noise. This observed/simulated pairing is what makes the Option B bias-correction model trainable: without a disclosed, structured gap between the two, there is nothing for a bias corrector to learn. Output: `data/simulation_dataset.csv`.
 
-## 6. Step 4 — ML refinement layer — `src/ml_refinement.py`
+## 6. Step 4: ML refinement layer (`src/ml_refinement.py`)
 
 `MLRefinementLayer` trains two independently evaluated random-forest regressors (100 trees each) on an 80/20 split of the Step 3 dataset:
 
-- **Option A — ML Emulator.** Trained on `[rainfall_mm, nitrogen_kg_ha, soc_pct, sowing_code]` to reproduce `simulated_yield_kg_ha`. Purpose: approximate the process model cheaply enough to scale predictions across many locations or grid cells without re-running APSIM for each one.
-- **Option B — Bias Corrector.** Trained on the same four covariates plus the simulated yield itself, to predict `observed_yield_kg_ha`. Purpose: correct the process model's output toward what would actually be observed in the field, which is the metric that ultimately matters for a farmer-facing advisory tool.
+- **Option A - ML Emulator.** Trained on `[rainfall_mm, nitrogen_kg_ha, soc_pct, sowing_code]` to reproduce `simulated_yield_kg_ha`. Purpose: approximate the process model cheaply enough to scale predictions across many locations or grid cells without re-running APSIM for each one.
+- **Option B - Bias Corrector.** Trained on the same four covariates plus the simulated yield itself, to predict `observed_yield_kg_ha`. Purpose: correct the process model's output toward what would actually be observed in the field, which is the metric that ultimately matters for a farmer-facing advisory tool.
 
 Running both, rather than only an emulator, was a deliberate choice: an emulator that faithfully reproduces the process model is a scaling tool, not a validation tool, since it is only ever as accurate as the process model it imitates. The bias corrector is the layer that actually closes the sim-to-real gap.
 
-### Step 5 — Evaluation
+### Step 5: Evaluation
 
 | Layer | RMSE (kg/ha) | MAE (kg/ha) | R² | MBE (kg/ha) | MAPE (%) |
 |---|---|---|---|---|---|
@@ -92,11 +92,11 @@ Diagnostics in `outputs/evaluation_plots.png`:
 
 **Does the ML layer reproduce or improve on the crop model?** The emulator reproduces it well (R²=0.94) but cannot exceed the process model's own accuracy, since it is trained only on the process model's output. The bias corrector is the layer that genuinely improves on the process model against ground truth (R²=0.97 vs. field-observed yield), because it is explicitly trained to correct the process model's systematic error rather than imitate it.
 
-**What field data would be needed for proper validation?** This prototype's "observed" yield is synthetic, constructed to be structurally learnable rather than measured. Operational deployment would require georeferenced, season- and plot-level yield records with matched planting date, fertilizer rate, and — ideally — soil sampling, alongside station or satellite-derived rainfall and temperature for the corresponding fields, so the bias corrector is trained against real management and environmental variance rather than a synthetic proxy for it.
+**What field data would be needed for proper validation?** This prototype's "observed" yield is synthetic, constructed to be structurally learnable rather than measured. Operational deployment would require georeferenced, season- and plot-level yield records with matched planting date, fertilizer rate, and soil sampling, alongside station or satellite-derived rainfall and temperature for the corresponding fields, so the bias corrector is trained against real management and environmental variance rather than a synthetic proxy for it.
 
-## 7. Step 4, Option D — Agentic advisory workflow — `src/agentic_workflow.py`
+## 7. Step 4, Option D - Agentic advisory workflow (`src/agentic_workflow.py`)
 
-`AgronomicAgent` composes the process model and ML layers into a single advisory pipeline via discrete tool calls: `get_weather_data()` → `get_soil_data()` → process-model simulation → ML emulator prediction → formatted advisory. Example output for Western Kenya, 85 kg N/ha, sown 15 March:
+`AgronomicAgent` composes the process model and ML layers into a single advisory pipeline via discrete tool calls: `get_weather_data()` --> `get_soil_data()` --> process-model simulation --> ML emulator prediction --> formatted advisory. Example output for Western Kenya, 85 kg N/ha, sown 15 March:
 
 ```
 • APSIM Process Model Prediction : 6,857.6 kg/ha (6.86 t/ha)
@@ -104,16 +104,20 @@ Diagnostics in `outputs/evaluation_plots.png`:
 • Agronomic Action: Apply Nitrogen split (50% basal at planting, 50% top-dressed at V6 stage).
 ```
 
-**Where an LLM belongs in this pipeline, and where it does not.** Every step up to and including the yield predictions above is deterministic, numerically reproducible, and physically grounded — `get_weather_data`, `get_soil_data`, the APSIM/fallback simulation, and the ML predictions must remain plain function/model calls, never LLM-generated, because agronomic recommendations need to be auditable and reproducible run-to-run. The one place an LLM adds legitimate value is turning the structured numeric output above into fluent, context-appropriate natural language for an extension officer or farmer — and even there, it should be constrained to phrase and explain the numbers it is given, never to generate or alter a yield figure itself. The current `run_advisory_pipeline` implementation uses a deterministic string template for exactly this reason; substituting an LLM call at that single point (with the structured dict as its only source of numeric truth) is the natural extension for a production system.
+**Where an LLM belongs in this pipeline, and where it does not.** Every step up to and including the yield predictions above is deterministic, numerically reproducible, and physically grounded, `get_weather_data`, `get_soil_data`, the APSIM/fallback simulation, and the ML predictions must remain plain function/model calls, never LLM-generated, because agronomic recommendations need to be auditable and reproducible run-to-run. The one place an LLM adds legitimate value is turning the structured numeric output above into fluent, context-appropriate natural language for an extension officer or farmer, and even there, it should be constrained to phrase and explain the numbers it is given, never to generate or alter a yield figure itself. The current `run_advisory_pipeline` implementation uses a deterministic string template for exactly this reason; substituting an LLM call at that single point (with the structured dict as its only source of numeric truth) is the natural extension for a production system.
 
 ## 8. How to run
-
+Clone the repository using "git clone https://github.com/Jackie-Mboya/crop-modelling-AI.git"
+Open using IDE environment like Visual Studio Code (VS code)
+Open terminal then run the following
 ```bash
 pip install -r requirements.txt
 python main.py
 ```
 
-This executes Steps 1–5 end to end: scenario comparison → simulation dataset generation → ML training and evaluation → diagnostic plots → agentic advisory demo. All outputs are written to `outputs/` and `data/`.
+Note: you can also install a virtual machine using `python -m venv venv`
+
+This executes Steps 1–5 end to end: scenario comparison --> simulation dataset generation --> ML training and evaluation --> diagnostic plots --> agentic advisory demo. All outputs are written to `outputs/` and `data/`.
 
 To run against real APSIM instead of the fallback: install [`apsimNGpy`](https://github.com/APSIMInitiative/ApsimNGpy) (listed in `requirements.txt`), install APSIM Next Generation locally, and update `apsim_binary_path` and `base_apsimx_file` in `config/crop_model_config.json` to point to a valid installation and baseline `.apsimx` maize simulation file.
 
@@ -127,4 +131,4 @@ To run against real APSIM instead of the fallback: install [`apsimNGpy`](https:/
 
 ## 10. License
 
-MIT — see `LICENSE`.
+MIT, see `LICENSE`.
