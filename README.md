@@ -87,8 +87,8 @@ Running both, rather than only an emulator, was a deliberate choice: an emulator
 The bias corrector outperforms the pure emulator on every metric — expected, since it is given the simulated yield as an additional input and only needs to learn the (comparatively lower-variance) residual structure, rather than the full process-model response surface from four covariates alone. The near-zero mean bias error for both layers indicates neither is systematically over- or under-predicting; the emulator's slightly larger RMSE/MAPE reflects the harder task of reconstructing the process model's nonlinear response purely from inputs.
 
 Diagnostics in `outputs/evaluation_plots.png`:
-- **Emulator parity plot** — predicted vs. APSIM-simulated yield on the test set, against the 1:1 line.
-- **Nitrogen response curve** — ML-predicted yield across the full 0–160 kg N/ha range at fixed rainfall (580 mm), overlaid with test-set predictions, to visually confirm the model has learned a physiologically sensible (saturating, monotonic) N response rather than an artefact of the training sample.
+- **Emulator parity plot** - predicted vs. APSIM-simulated yield on the test set, against the 1:1 line.
+- **Nitrogen response curve** - ML-predicted yield across the full 0–160 kg N/ha range at fixed rainfall (580 mm), overlaid with test-set predictions, to visually confirm the model has learned a physiologically sensible (saturating, monotonic) N response rather than an artefact of the training sample.
 
 **Does the ML layer reproduce or improve on the crop model?** The emulator reproduces it well (R²=0.94) but cannot exceed the process model's own accuracy, since it is trained only on the process model's output. The bias corrector is the layer that genuinely improves on the process model against ground truth (R²=0.97 vs. field-observed yield), because it is explicitly trained to correct the process model's systematic error rather than imitate it.
 
@@ -117,7 +117,7 @@ python main.py
 
 Note: you can also install a virtual machine using `python -m venv venv`
 
-This executes Steps 1–5 end to end: scenario comparison --> simulation dataset generation --> ML training and evaluation --> diagnostic plots --> agentic advisory demo. All outputs are written to `outputs/` and `data/`.
+This executes Steps 1 - 5 end to end: scenario comparison --> simulation dataset generation --> ML training and evaluation --> diagnostic plots --> agentic advisory demo. All outputs are written to `outputs/` and `data/`.
 
 To run against real APSIM instead of the fallback: install [`apsimNGpy`](https://github.com/APSIMInitiative/ApsimNGpy) (listed in `requirements.txt`), install APSIM Next Generation locally, and update `apsim_binary_path` and `base_apsimx_file` in `config/crop_model_config.json` to point to a valid installation and baseline `.apsimx` maize simulation file.
 
