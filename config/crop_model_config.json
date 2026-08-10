@@ -1,0 +1,8 @@
+{
+  "apsim_binary_path": "C:\\Program Files\\APSIM2026.7.8087.0\\bin\\Models.exe",
+  "base_apsimx_file": "data/maize_baseline.apsimx",
+  "crop_type": "Maize",
+  "country": "Kenya",
+  "region": "East Africa",
+  "location": "Western_Kenya_Zone_1"
+}
