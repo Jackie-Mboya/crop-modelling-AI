@@ -81,7 +81,7 @@ Running both, rather than only an emulator, was a deliberate choice: an emulator
 
 | Layer | RMSE (kg/ha) | MAE (kg/ha) | R² | MBE (kg/ha) | MAPE (%) |
 |---|---|---|---|---|---|
-| Option A: ML Emulator (vs. APSIM sim) | 464.80.9 | 388.42 | 0.930 | -61.21 | 8.96 |
+| Option A: ML Emulator (vs. APSIM sim) | 464.80 | 388.42 | 0.930 | -61.21 | 8.96 |
 | Option B: Bias Corrector (vs. field obs) | 241.73 | 195.75 | 0.972 | +27.63 | 4.68 |
 
 The bias corrector outperforms the pure emulator on every metric, expected, since it is given the simulated yield as an additional input and only needs to learn the (comparatively lower-variance) residual structure, rather than the full process-model response surface from four covariates alone. The near-zero mean bias error for both layers indicates neither is systematically over- or under-predicting; the emulator's slightly larger RMSE/MAPE reflects the harder task of reconstructing the process model's nonlinear response purely from inputs.
