@@ -2,7 +2,7 @@
 
 **A process-based crop model × machine learning workflow for maize yield prediction and agronomic decision support in sub-Saharan Africa.**
 
-Prototype developed for the IITA "Integrated Crop Modelling and AI Expert" consultancy assessment. The workflow couples a process-based crop simulation engine (native APSIM, with a physiologically calibrated fallback) with a two-stage machine learning layer — an emulator that reproduces process-model behaviour and a bias-correction model that reconciles simulated yield against field-observed yield — orchestrated through a lightweight agentic decision-support pipeline.
+Prototype developed for the IITA "Integrated Crop Modelling and AI Expert" consultancy assessment. The workflow couples a process-based crop simulation engine (native APSIM, with a physiologically calibrated fallback) with a two-stage machine learning layer, an emulator that reproduces process-model behaviour and a bias-correction model that reconciles simulated yield against field-observed yield, orchestrated through a lightweight agentic decision-support pipeline.
 
 ---
 
@@ -12,7 +12,7 @@ Process-based crop models such as APSIM and DSSAT remain the standard for mechan
 
 1. Runs a process-based maize model across defined agronomic scenarios (Step 1–2).
 2. Generates a synthetic-but-structured simulation dataset spanning realistic ranges of the key agronomic drivers of yield (Step 3).
-3. Trains **two distinct ML layers** on top of the process model output — an emulator (Option A) and a bias corrector against field observations (Option B) — rather than treating "ML refinement" as a single undifferentiated step (Step 4).
+3. Trains **two distinct ML layers** on top of the process model output, an emulator (Option A) and a bias corrector against field observations (Option B), rather than treating "ML refinement" as a single undifferentiated step (Step 4).
 4. Evaluates both layers with standard regression metrics and diagnostic plots (Step 5).
 5. Wraps the whole pipeline in a minimal agentic controller that composes deterministic tool calls into a single advisory output (Step 4, Option D).
 
