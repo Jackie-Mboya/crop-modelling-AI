@@ -1,4 +1,4 @@
 Scenario,Planting Date,Nitrogen Rate (kg/ha),Simulated Yield (kg/ha),Simulated Yield (t/ha)
-Baseline (No Fertilizer),15-Mar,0,3621.81,3.62
-Moderate N,15-Mar,60,6245.29,6.25
-High N,15-Mar,120,7136.21,7.14
+Baseline (No Fertilizer),15-Mar,0,3613.18,3.61
+Moderate N,15-Mar,60,6152.19,6.15
+High N,15-Mar,120,6520.25,6.52
