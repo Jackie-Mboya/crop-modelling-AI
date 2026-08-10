@@ -1,3 +1,3 @@
 ,RMSE (kg/ha),MAE (kg/ha),R² Score,MBE (kg/ha),MAPE (%)
-Option A: ML Emulator (vs APSIM Sim),385.52,304.2,0.942,40.91,6.85
-Option B: Bias Corrector (vs Field Obs),216.65,185.15,0.973,-19.11,4.11
+Option A: ML Emulator (vs APSIM Sim),464.8,388.42,0.93,-61.21,8.96
+Option B: Bias Corrector (vs Field Obs),241.73,195.75,0.972,27.63,4.68
