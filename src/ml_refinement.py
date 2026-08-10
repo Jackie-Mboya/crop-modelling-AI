@@ -4,6 +4,7 @@ from sklearn.ensemble import RandomForestRegressor
 from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
 from sklearn.model_selection import train_test_split
 
+# Layer for refining ML models by incorporating bias correction
 class MLRefinementLayer:
     def __init__(self, random_state=42):
         self.emulator = RandomForestRegressor(n_estimators=100, random_state=random_state)
@@ -14,6 +15,8 @@ class MLRefinementLayer:
         date_mapping = {"10-Mar": 0, "20-Mar": 1, "05-Apr": 2, "20-Apr": 3}
         df_encoded["sowing_code"] = df_encoded["sowing_date"].map(lambda x: date_mapping.get(x, 1))
         return df_encoded
+    
+    # Train ML Emulator on APSIM Simulated Yield and Bias Corrector on Observed Yield
 
     def train_and_evaluate(self, df):
         df_encoded = self.prepare_features(df)
@@ -24,15 +27,20 @@ class MLRefinementLayer:
         X_train, X_test, y_sim_tr, y_sim_te, y_obs_tr, y_obs_te = train_test_split(
             X, y_sim, y_obs, test_size=0.2, random_state=42
         )
+        
+        # Train ML Emulator on APSIM Simulated Yield
 
         self.emulator.fit(X_train, y_sim_tr)
         y_sim_pred = self.emulator.predict(X_test)
 
+        # Prepare data for Bias Corrector by combining features with simulated yield
+        
         X_bc_tr = X_train.copy()
         X_bc_tr["simulated_yield"] = y_sim_tr
         X_bc_te = X_test.copy()
         X_bc_te["simulated_yield"] = y_sim_te
 
+        # Bias Corrector Training and Prediction
         self.bias_corrector.fit(X_bc_tr, y_obs_tr)
         y_obs_pred = self.bias_corrector.predict(X_bc_te)
 
